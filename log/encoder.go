@@ -27,14 +27,24 @@ var (
 )
 
 func EncodeTimeAddLevel(t time.Time, l zapcore.Level, enc zapcore.PrimitiveArrayEncoder) {
-	level := l.CapitalString()
-	switch level {
-	case "INFO":
-		level = "I"
-	case "ERROR":
-		level = "E"
-	case "DEBUG":
-		level = "D"
+	level := ""
+	switch l {
+	case zapcore.DebugLevel:
+		level = "DE"
+	case zapcore.InfoLevel:
+		level = "IN"
+	case zapcore.WarnLevel:
+		level = "WA"
+	case zapcore.ErrorLevel:
+		level = "ER"
+	case zapcore.DPanicLevel:
+		level = "DP"
+	case zapcore.PanicLevel:
+		level = "PA"
+	case zapcore.FatalLevel:
+		level = "FA"
+	default:
+		level = fmt.Sprintf("L%1d", -1*l)
 	}
 	enc.AppendString(level + t.Format("0102T15:04:05"))
 }
@@ -98,7 +108,7 @@ func (c consoleEncoder) EncodeEntry(ent zapcore.Entry, fields []zapcore.Field) (
 		}
 		_, _ = fmt.Fprint(line, arr.elems[i])
 	}
-	line.AppendByte(']')
+	line.AppendString(" |")
 	putSliceEncoder(arr)
 
 	// Add the message itself.
@@ -348,7 +358,9 @@ type jsonEncoder struct {
 //
 // Note that the encoder doesn't deduplicate keys, so it's possible to produce
 // a message like
-//   {"foo":"bar","foo":"baz"}
+//
+//	{"foo":"bar","foo":"baz"}
+//
 // This is permitted by the JSON specification, but not encouraged. Many
 // libraries will ignore duplicate key-value pairs (typically keeping the last
 // pair) when unmarshaling, but users should attempt to avoid adding duplicate
