@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"math"
+	"strings"
 	"sync"
 	"time"
 	"unicode/utf8"
@@ -109,9 +110,15 @@ func (c consoleEncoder) EncodeEntry(ent zapcore.Entry, fields []zapcore.Field) (
 		_, _ = fmt.Fprint(line, arr.elems[i])
 	}
 	line.AppendString(" |")
-	if c.EncodeName != nil {
-		c.EncodeName(ent.LoggerName, arr)
+
+	//  Add logger name.
+	var s string
+	if len(ent.LoggerName) >= 6 {
+		s = ent.LoggerName[len(ent.LoggerName)-6:]
+	} else {
+		s = ent.LoggerName + strings.Repeat("o", 6-len(ent.LoggerName))
 	}
+	line.AppendString(" " + s + " |")
 	putSliceEncoder(arr)
 
 	// Add the message itself.
