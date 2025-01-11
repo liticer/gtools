@@ -109,6 +109,9 @@ func (c consoleEncoder) EncodeEntry(ent zapcore.Entry, fields []zapcore.Field) (
 		_, _ = fmt.Fprint(line, arr.elems[i])
 	}
 	line.AppendString(" |")
+	if ent.LoggerName != "" {
+		line.AppendString(" " + ent.LoggerName + " |")
+	}
 	putSliceEncoder(arr)
 
 	// Add the message itself.
