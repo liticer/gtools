@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"math"
-	"strings"
 	"sync"
 	"time"
 	"unicode/utf8"
@@ -114,10 +113,15 @@ func (c consoleEncoder) EncodeEntry(ent zapcore.Entry, fields []zapcore.Field) (
 	//  Add logger name.
 	s := "logger"
 	if len(ent.LoggerName) > 0 {
-		if idx := strings.LastIndex(ent.LoggerName, "."); idx != -1 {
-			s = ent.LoggerName[idx+1:]
-		} else {
-			s = ent.LoggerName
+		s = ent.LoggerName
+		i := len(s) - 1
+		for ; i >= 0; i-- {
+			if s[i] == '.' || s[i] == '-' {
+				break
+			}
+		}
+		if i >= 0 && i+1 < len(s) {
+			s = s[i+1:]
 		}
 	}
 	line.AppendString(" " + s + " |")
