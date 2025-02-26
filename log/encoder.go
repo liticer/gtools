@@ -113,10 +113,13 @@ func (c consoleEncoder) EncodeEntry(ent zapcore.Entry, fields []zapcore.Field) (
 
 	//  Add logger name.
 	var s string
-	if len(ent.LoggerName) >= 6 {
-		s = ent.LoggerName[len(ent.LoggerName)-6:]
-	} else {
-		s = ent.LoggerName + strings.Repeat("o", 6-len(ent.LoggerName))
+	if len(ent.LoggerName) > 0 {
+		if idx := strings.LastIndex(ent.LoggerName, "."); idx != -1 {
+			s = ent.LoggerName[idx+1:]
+		}
+	}
+	if s == "" {
+		s = "logger"
 	}
 	line.AppendString(" " + s + " |")
 	putSliceEncoder(arr)
